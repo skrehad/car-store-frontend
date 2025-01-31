@@ -187,7 +187,7 @@ const AllCars = () => {
             key={index}
             onClick={() => setCurrentPage(index + 1)}
             className={`px-4 cursor-pointer py-2 ${
-              currentPage === index + 1 ? "bg-blue-600" : "bg-blue-400"
+              currentPage === index + 1 ? "bg-blue-400" : "bg-blue-600"
             } text-white rounded-md`}
           >
             {index + 1}
