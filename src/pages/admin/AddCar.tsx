@@ -85,11 +85,11 @@ const AddCar = () => {
         </h1>
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>
-            <label className="block text-md font-medium mb-2">Title</label>
+            <label className="block text-md font-medium mb-2">Car Name</label>
             <input
               {...register("name", { required: "Title is required" })}
               type="text"
-              placeholder="Enter car title"
+              placeholder="Enter car name"
               className={`w-full px-4 py-2 text-white rounded-lg border ${
                 errors.name
                   ? "border-red-500 focus:ring-red-500"
@@ -97,12 +97,12 @@ const AddCar = () => {
               } focus:outline-none focus:ring-2`}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">Title is required</p>
+              <p className="text-red-500 text-sm mt-1">Name is required</p>
             )}
           </div>
 
           <div>
-            <label className="block text-md font-medium mb-2">Brand</label>
+            <label className="block text-md font-medium mb-2">Car Brand</label>
             <input
               {...register("brand", { required: "Brand is required" })}
               type="text"
@@ -118,7 +118,7 @@ const AddCar = () => {
             )}
           </div>
           <div>
-            <label className="block text-md font-medium mb-2">Model</label>
+            <label className="block text-md font-medium mb-2"> Car Model</label>
             <input
               {...register("model", { required: "Model is required" })}
               type="text"

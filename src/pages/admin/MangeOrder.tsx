@@ -1,24 +1,33 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState } from "react";
 import { RingLoader } from "react-spinners";
-import {
-  useDeleteCarMutation,
-  useGetAllCarDataQuery,
-} from "../../redux/features/carManagement/carApi";
+import { toast } from "sonner";
 import { useAppSelector } from "../../redux/features/hook";
 import { useCurrentUser } from "../../redux/features/auth/authSlice";
-import { Car } from "../../constants/type";
-import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import {
+  useAcceptOrderMutation,
+  useCancelOrderMutation,
+  useDeleteOrderMutation,
+  useGetAdminOrdersDataQuery,
+} from "../../redux/features/OrderManagement/orderApi";
+import { TOrder, User } from "../../constants/type";
 
-const ManageCar = () => {
-  const { data, isLoading } = useGetAllCarDataQuery(undefined, {
+const ManageOrder = () => {
+  const user = useAppSelector(useCurrentUser) as User;
+
+  const { data, isLoading } = useGetAdminOrdersDataQuery(user?.email, {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
     refetchOnReconnect: true,
+    pollingInterval: 2000,
   });
 
-  const [deleteCar] = useDeleteCarMutation();
-  const user = useAppSelector(useCurrentUser);
+  console.log(data);
+  const [acceptOrder] = useAcceptOrderMutation();
+  const [cancelOrder] = useCancelOrderMutation();
+  const [deleteOrder] = useDeleteOrderMutation();
+
+  // Modal state
+  const [selectedBuyer, setSelectedBuyer] = useState<TOrder | null>(null);
 
   if (isLoading) {
     return (
@@ -28,96 +37,166 @@ const ManageCar = () => {
     );
   }
 
-  const allCarsData = data?.data;
-  const matchCar = allCarsData.filter((item: Car) => item?.name);
+  const orderData = data?.data;
+  // console.log(orderData);
 
-  const handleDeleteProduct = async (id: string) => {
-    const carInfo = { id };
+  const handleAcceptOrder = async (id: string) => {
+    const bookInfo = {
+      id: id,
+    };
+
     try {
-      const result = await deleteCar(carInfo).unwrap();
-      toast.success(result?.message, { duration: 2000 });
+      const result = await acceptOrder(bookInfo).unwrap();
+      console.log(result);
+      toast.success(result.message);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error("Something Went Wrong..", { duration: 2000 });
+      toast.error("Something Went Wrong");
+    }
+  };
+  const handleCancelOrder = async (id: string) => {
+    const bookInfo = {
+      id: id,
+    };
+
+    try {
+      const result = await cancelOrder(bookInfo).unwrap();
+      // console.log(result);
+      toast.success(result.message);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error("Something Went Wrong");
+    }
+  };
+  const handleDeleteOrder = async (id: string) => {
+    // console.log(id);
+    const orderInfo = {
+      id: id,
+    };
+
+    // console.log(orderInfo);
+
+    try {
+      const result = await deleteOrder(orderInfo).unwrap();
+      // console.log(result);
+      toast.success(result.message);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error("Something Went Wrong");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container p-2 mx-auto sm:p-4 text-white">
-        <h2 className="mb-8 text-4xl font-semibold leading-tight text-center">
-          My Cars To Sell
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full h-full text-xs border-separate border-spacing-4">
-            <thead className="mb-4">
-              <tr className="text-center border-b-2 border-gray-300">
-                <th className="text-xl">Image</th>
-                <th className="text-xl">Title</th>
-                <th className="text-xl">Category</th>
-                <th className="text-xl">Price</th>
-                <th className="text-xl">Number Of Cars</th>
-                <th className="text-xl">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {matchCar.map((item: Car) => (
-                <tr
-                  key={item._id}
-                  className="border-b border-opacity-20 border-gray-300"
-                >
-                  <td className="text-center">
-                    <div className="flex justify-center items-center">
-                      <div className="w-14 h-14 overflow-hidden">
-                        <img
-                          className="w-full h-full object-cover rounded-full"
-                          src={item?.image}
-                        />
-                      </div>
+    <div className="bg-gradient-to-b from-[#1B1B31] via-[#2B1E36] to-[#1B1B31] text-white p-6 min-h-screen">
+      <div className="overflow-x-auto">
+        <table className="min-w-full table-auto ">
+          {/* Table Head */}
+          <thead>
+            <tr>
+              <th className=" text-lg py-3 text-center">Image</th>
+              <th className=" text-lg py-3 text-center">Name</th>
+              <th className=" text-lg py-3 text-center">Price</th>
+              <th className=" text-lg py-3 text-center">Category</th>
+              <th className=" text-lg py-3 text-center">Tran. ID</th>
+              <th className=" text-lg py-3 text-center">Status</th>
+              <th className=" text-lg py-3 text-center">Action</th>
+              <th className=" text-lg py-3 text-center">Buyer Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {/* Table Rows */}
+            {orderData?.map((item: TOrder) => (
+              <tr key={item._id} className="border-b">
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-center">
+                    <div className="rounded-full h-12 w-12 overflow-hidden">
+                      <img
+                        src={item?.product?.image}
+                        alt="Avatar"
+                        className="object-cover w-full h-full"
+                      />
                     </div>
-                  </td>
-                  <td className="text-center">
-                    <p className="text-lg">{item?.name}</p>
-                  </td>
-                  <td className="text-center">
-                    <p className="text-lg">{item?.category}</p>
-                  </td>
-                  <td className="text-center">
-                    <p className="text-lg">৳ {item?.price}</p>
-                  </td>
-                  <td className="text-center">
-                    <p className="text-lg">{item?.stock}</p>
-                  </td>
-                  <td className="text-center relative">
-                    <ul className="py-1 space-y-2">
-                      {user && (
-                        <li>
-                          <button
-                            onClick={() => handleDeleteProduct(item?._id)}
-                            className="cursor-pointer py-2 bg-gray-50 dark:bg-gray-900 text-white z-10 border border-gray-200 rounded-lg shadow-lg w-full transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl"
-                          >
-                            Delete
-                          </button>
-                        </li>
-                      )}
-                      <li>
-                        <button className="cursor-pointer py-2 bg-gray-50 dark:bg-gray-900 text-white z-10 border border-gray-200 rounded-lg shadow-lg w-full transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-2xl">
-                          <Link
-                            to={`/admin/dashboard/update-product/${item._id}`}
-                          >
-                            Update
-                          </Link>
-                        </button>
-                      </li>
-                    </ul>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </td>
+                <td className="px-6 font-bold text-center py-4">
+                  {item?.product?.name}
+                </td>
+                <td className="px-6 font-bold text-center py-4">
+                  $ {item?.product?.price}
+                </td>
+                <td className="px-6 font-bold text-center py-4">
+                  {item?.product?.category}
+                </td>
+                <td className="px-6 font-bold text-center py-4">
+                  {item?.transactionId.slice(0, 10)}...
+                </td>
+                <td className="px-6 text-center font-bold py-4">
+                  {item?.paidStatus.toString()}
+                </td>
+
+                <td className="px-6 text-center font-bold py-4 ">
+                  <button
+                    onClick={() => handleAcceptOrder(item?._id)}
+                    className="text-white m-1  bg-gradient-to-r cursor-pointer from-purple-500 to-blue-500  hover:from-blue-500 hover:to-purple-500 focus:outline-none  text-xs py-1 px-3 rounded-full hover:bg-blue-600"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleCancelOrder(item?._id)}
+                    className="text-white  m-1 bg-gradient-to-r cursor-pointer from-purple-500 to-blue-500  hover:from-blue-500 hover:to-purple-500 focus:outline-none  text-xs py-1 px-3 rounded-full hover:bg-blue-600"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteOrder(item?._id)}
+                    className="text-white  m-1 bg-gradient-to-r cursor-pointer from-purple-500 to-blue-500  hover:from-blue-500 hover:to-purple-500 focus:outline-none  text-xs py-1 px-3 rounded-full hover:bg-blue-600"
+                  >
+                    Delete
+                  </button>
+                </td>
+                <td className="px-6 text-center py-4 ">
+                  <button
+                    className="text-white bg-gradient-to-r cursor-pointer from-purple-500 to-blue-500  hover:from-blue-500 hover:to-purple-500 focus:outline-none  text-xs py-1 px-3 rounded-full hover:bg-blue-600"
+                    onClick={() => setSelectedBuyer(item)}
+                  >
+                    Buyer
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {/* Modal */}
+      {selectedBuyer && (
+        <div className="fixed inset-0 flex items-center justify-center  z-50">
+          <div className="bg-gradient-to-b from-[#1B1B31] via-[#2B1E36] to-[#1B1B31] text-white rounded-lg w-96 p-6 relative">
+            <h3 className="font-bold text-lg mb-4">Buyer Details</h3>
+            <p className="py-2">
+              <strong>Name:</strong> {selectedBuyer?.userInfo.name}
+            </p>
+            <p className="py-2">
+              <strong>Email:</strong> {selectedBuyer?.userInfo.email}
+            </p>
+            <p className="py-2">
+              <strong>Transaction ID:</strong> {selectedBuyer?.transactionId}
+            </p>
+
+            <div className="absolute top-3 right-3">
+              <button
+                className="bg-red-500 text-white py-1 px-3 rounded-full hover:bg-red-600"
+                onClick={() => setSelectedBuyer(null)} // মোডাল বন্ধ
+              >
+                X
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default ManageCar;
+export default ManageOrder;

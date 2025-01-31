@@ -97,7 +97,7 @@ const ManageCar = () => {
                       <p className="text-lg">{item?.category}</p>
                     </td>
                     <td className="text-center">
-                      <p className="text-lg">৳ {item?.price}</p>
+                      <p className="text-lg">$ {item?.price}</p>
                     </td>
                     <td className="text-center">
                       <p className="text-lg">{item?.stock}</p>
