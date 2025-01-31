@@ -108,9 +108,9 @@ npm run dev
 
 5️⃣ Access the App
 
-Frontend: http://localhost:3000
+Frontend: https://assignment-4-frontend-psi.vercel.app/
 
-Backend: http://localhost:5000
+Backend: https://assignment-4-backend-phi.vercel.app/
 
 🎯 Project Completion
 

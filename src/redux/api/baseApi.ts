@@ -11,7 +11,7 @@ import { RootState } from "../features/store";
 import { logout, setUser } from "../features/auth/authSlice";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:4000/",
+  baseUrl: "https://assignment-4-backend-phi.vercel.app/",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
@@ -47,10 +47,13 @@ const baseQueryWithRefreshToken: BaseQueryFn<
     // console.log("Sending refresh token");
 
     // set token after token has expired by refreshing token
-    const res = await fetch("http://localhost:4000/api/auth/refresh-token", {
-      method: "POST",
-      credentials: "include",
-    });
+    const res = await fetch(
+      "https://assignment-4-backend-phi.vercel.app/api/auth/refresh-token",
+      {
+        method: "POST",
+        credentials: "include",
+      }
+    );
 
     const data = await res.json();
 
